@@ -15,10 +15,12 @@
             <a class="name-title">Conway's Game of Life</a>
         </div>
         <div id="viz" class="viz">
-            
-            
+            <canvas id="board" height="400" width="400">
+            </canvas>
         </div>
         <div id="options" class="options">
+            <input id="rows" type="range" min="50" max="500" step="10" />
+            <input id="cols" type="range" min="50" max="500" step="10" />
         </div>
 
         <script type="text/javascript" src="js/main.js"></script>
