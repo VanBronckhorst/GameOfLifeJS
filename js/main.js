@@ -1,8 +1,4 @@
 // Conway's Game of Life Settings
-// the next state is a convolution of the current state with this filter
-const filter = [[1, 1, 1],
-                [1, 9, 1],
-                [1, 1, 1]];
 const nextState = (cell) => (cell == 11 || cell == 12 || cell == 3) ? ALIVE : DEAD;
 const ALIVE = 1;
 const DEAD = 0;
@@ -21,6 +17,8 @@ board.width = SIDE;
 const WIDTH = 50;
 const HEIGHT = 50;
 let state = createArray(HEIGHT, WIDTH);
+// small optimization, create it once instead of every generation
+let next = createArray(HEIGHT, WIDTH);
 
 // Canvas On click (Flip Bit)
 board.addEventListener('click', (event) => {
@@ -49,40 +47,41 @@ function init() {
     // tick(state);
 } 
 
-function tick(state) {
-    state = computeNextGeneration(state);
+function tick() {
+    // Modifies global variable next, small optimization
+    computeNextGeneration(state);
+    var tmp = state;
+    state = next;
+    next = tmp;
+    
     displayState(state, board);
     requestAnimationFrame(() => tick(state));
 } 
 
 // compute the next generation from the current one using Conway's Game of Life rules
-// The computation is a convolution between the current state and the filter
 // https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+// Using var is much faster in Chrome (function non optimized otherwise)
+// Not the best way to implement the algorithm, but it is written with optimization in mind
 function computeNextGeneration(state) {
-    let next = createArray(HEIGHT, WIDTH);
 
-    // Center of the filter coordinates
-    const c_r = Math.floor(filter.length / 2);
-    const c_c = Math.floor(filter[0].length / 2);
-
-    for (let i = 1; i < state.length -1; i++) {
-        for (let j = 1; j < state[i].length -1; j++) {
-            let cellSum = 0;
+    for (var i = 1; i < state.length -1; i++) {
+        for (var j = 1; j < state[i].length -1; j++) {
+            var cellSum = 0;
             // Convolution
             if (state[i][j] == ALIVE) {
                 cellSum += 9;
             } 
             // Top
-            cellSum += state[i - 1][j - 1];
-            cellSum += state[i - 1][j];
-            cellSum += state[i - 1][j + 1];
+            cellSum = cellSum + state[i - 1][j - 1];
+            cellSum = cellSum + state[i - 1][j];
+            cellSum = cellSum + state[i - 1][j + 1];
             // Middle
-            cellSum += state[i][j - 1];
-            cellSum += state[i][j + 1];
+            cellSum = cellSum + state[i][j - 1];
+            cellSum = cellSum + state[i][j + 1];
             // Bottom
-            cellSum += state[i + 1][j - 1];
-            cellSum += state[i + 1][j];
-            cellSum += state[i + 1][j + 1];
+            cellSum = cellSum + state[i + 1][j - 1];
+            cellSum = cellSum + state[i + 1][j];
+            cellSum = cellSum + state[i + 1][j + 1];
 
             next[i][j] = nextState(cellSum);
         }
@@ -90,19 +89,17 @@ function computeNextGeneration(state) {
 
     // Copy Borders For Wrapover 
     // Works because real border is always empty (already mirrored)
-    let w = state[0].length;
-    for (let i = 0; i < state.length; i++) {
+    var w = state[0].length;
+    for (var i = 0; i < state.length; i++) {
         next[i][0] = next[i][w - 3];
         next[i][w - 2] = next[i][1];
     }
 
-    let h = state.length;
-    for (let i = 0; i < state[0].length; i++) {
+    var h = state.length;
+    for (var i = 0; i < state[0].length; i++) {
         next[0][i] = next[h - 3][i];
         next[h - 2][i] = next[1][i];
     }
-
-    return next;
 }
 
 // draws a generation defined by the state variable on the board canvas
