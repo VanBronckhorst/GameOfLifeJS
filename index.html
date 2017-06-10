@@ -19,8 +19,16 @@
             </canvas>
         </div>
         <div id="options" class="options">
-            <input id="rows" type="range" min="50" max="500" step="10" />
-            <input id="cols" type="range" min="50" max="500" step="10" />
+            <label for="rows">Rows:</label>
+            <input id="rows" type="range" min="50" max="700" step="10" value="300"/>
+            <label for="cols">Columns:</label>
+            <input id="cols" type="range" min="50" max="700" step="10" value="300"/>
+            <div class="small-space"/>
+            <div id="buttons-row">
+                <button onclick="init()">Reload</button>
+                <button onclick="start()">Start</button>
+                <button onclick="stop()">Stop</button>
+            </div>
         </div>
 
         <script type="text/javascript" src="js/main.js"></script>

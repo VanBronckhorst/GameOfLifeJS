@@ -4,21 +4,30 @@ const ALIVE = 1;
 const DEAD = 0;
 
 // Canvas Size Configuration
+const BORDER = 1;
 const style = window.getComputedStyle(document.getElementById("viz", null));
-const H = parseFloat(style.getPropertyValue('height'));
-const W = parseFloat(style.getPropertyValue('width'));
+const H = parseFloat(style.getPropertyValue('height')) - 2 * BORDER;
+const W = parseFloat(style.getPropertyValue('width')) - 2 * BORDER;
 const SIDE = Math.min(W, H);
 
 const board = document.getElementById("board");
 board.height = SIDE;
 board.width = SIDE;
 
+// Interface bindings
+const rowsRange = document.getElementById("rows");
+const colsRange = document.getElementById("cols");
+
 // Global constants for the board
-const WIDTH = 500;
-const HEIGHT = 500;
-let state = createArray(HEIGHT, WIDTH);
+let WIDTH = 500;
+let HEIGHT = 500;
+let state;
 // small optimization, create it once instead of every generation
-let next = createArray(HEIGHT, WIDTH);
+let next;
+
+// Global variable storing the loop identifier
+let tickLoop;
+let running = false;
 
 // Canvas On click (Flip Bit)
 board.addEventListener('click', (event) => {
@@ -40,12 +49,13 @@ board.addEventListener('click', (event) => {
 
 init();
 function init() {
+    HEIGHT = colsRange.value;
+    WIDTH = rowsRange.value;
+    
     state = createArray(HEIGHT, WIDTH);
     next = createArray(HEIGHT, WIDTH);
     fillRandomly(state, HEIGHT * 0.5, WIDTH * 0.5, Math.floor(HEIGHT * 0.25), Math.floor(WIDTH * 0.25));
     displayState(state, board);
-
-    // tick(state);
 } 
 
 function tick() {
@@ -56,8 +66,22 @@ function tick() {
     next = tmp;
     
     displayState(state, board);
-    requestAnimationFrame(() => tick(state));
-} 
+    tickLoop = requestAnimationFrame(() => tick(state));
+}
+
+function start() {
+    if (running) {
+        return;
+    }
+
+    running = true;
+    tick();
+}
+
+function stop() {
+    running = false;
+    cancelAnimationFrame(tickLoop);
+}
 
 // compute the next generation from the current one using Conway's Game of Life rules
 // https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
@@ -106,6 +130,7 @@ function computeNextGeneration(state) {
 // draws a generation defined by the state variable on the board canvas
 function displayState(state, board) {
     const context = board.getContext('2d');
+    context.fillStyle="#2c3e50";
     const boardW = board.width;
     const boardH = board.height;
 
