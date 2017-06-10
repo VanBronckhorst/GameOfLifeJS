@@ -14,8 +14,8 @@ board.height = SIDE;
 board.width = SIDE;
 
 // Global constants for the board
-const WIDTH = 50;
-const HEIGHT = 50;
+const WIDTH = 500;
+const HEIGHT = 500;
 let state = createArray(HEIGHT, WIDTH);
 // small optimization, create it once instead of every generation
 let next = createArray(HEIGHT, WIDTH);
@@ -40,7 +40,8 @@ board.addEventListener('click', (event) => {
 
 init();
 function init() {
-    
+    state = createArray(HEIGHT, WIDTH);
+    next = createArray(HEIGHT, WIDTH);
     fillRandomly(state, HEIGHT * 0.5, WIDTH * 0.5, Math.floor(HEIGHT * 0.25), Math.floor(WIDTH * 0.25));
     displayState(state, board);
 
